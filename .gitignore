@@ -1,3 +1,4 @@
 __pycache__/
 tests/
 *.sh
+__init__.py
