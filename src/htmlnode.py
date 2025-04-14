@@ -1,7 +1,3 @@
-# some text
-# <tag>some text</tag>
-# <tag prop1="" prop2="">bla bla</tag>
-
 from functools import reduce
 
 class HTMLNode:
@@ -27,4 +23,10 @@ class HTMLNode:
                       "")
 
     def __repr__(self):
-        return f"<{self.tag}{self.props_to_html()}>{self.value}\n{self.children}"
+        str_tag = self.tag if self.tag != None else ""
+        str_val = self.value if self.value != None else ""
+        str_children = str(self.children) if (self.children != None and len(self.children) > 0) else ""
+
+        if len(str_children) > 0:
+            return f"<{str_tag}{self.props_to_html()}>{str_val}\n{str_children}"
+        return f"<{str_tag}{self.props_to_html()}>{str_val}"
