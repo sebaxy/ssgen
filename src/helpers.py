@@ -34,9 +34,6 @@ def extract_markdown_links(text):
     return re.findall(r"[^!]\[(.+?)\]\((.+?)\)", text)
 
 
-node = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", 
-                TextType.TEXT)
-
 
 def split_from_links(node, md_links, text_type):
     split_nodes = []
@@ -67,7 +64,15 @@ def split_from_links(node, md_links, text_type):
 def split_nodes_link(old_nodes):
     new_nodes = []
     for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+
         md_links = extract_markdown_links(old_node.text)
+        if len(md_links) < 1:
+            new_nodes.append(old_node)
+            continue
+
         split_nodes = split_from_links(old_node, md_links, TextType.LINK)
         new_nodes.extend(split_nodes)
 
@@ -78,9 +83,32 @@ def split_nodes_link(old_nodes):
 def split_nodes_image(old_nodes):
     new_nodes = []
     for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+
         md_images = extract_markdown_images(old_node.text)
+        if len(md_images) < 1:
+            new_nodes.append(old_node)
+            continue
+
         split_nodes = split_from_links(old_node, md_images, TextType.IMAGE)
         new_nodes.extend(split_nodes)
 
     return new_nodes
 
+
+
+def text_to_textnodes(text):
+    node = TextNode(text, TextType.TEXT)
+    nodes = split_nodes_delimiter([node], '**', TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, '_', TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, '`', TextType.CODE)
+    nodes = split_nodes_link(nodes)
+    nodes = split_nodes_image(nodes)
+
+    return nodes
+
+
+s = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+print(text_to_textnodes(s))
